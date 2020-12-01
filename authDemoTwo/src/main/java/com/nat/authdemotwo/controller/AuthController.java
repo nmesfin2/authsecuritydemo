@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.nat.authdemotwo.model.ERole;
 import com.nat.authdemotwo.model.Role;
 import com.nat.authdemotwo.model.User;
+import com.nat.authdemotwo.playload.request.LoginRequest;
 import com.nat.authdemotwo.playload.request.SignupRequest;
 import com.nat.authdemotwo.playload.response.MessageResponse;
 import com.nat.authdemotwo.repository.RoleRepository;
@@ -33,8 +34,12 @@ public class AuthController {
 	@Autowired
 	RoleRepository roleRepository;
 	
-	@PostMapping("/signup")
+	@PostMapping("/login")
+	public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest){
+		return null;
+	}
 	
+	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest ) {
 		
 		if(userRepository.existsByUsername(signUpRequest.getUsername())) {
