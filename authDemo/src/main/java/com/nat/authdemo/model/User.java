@@ -1,4 +1,4 @@
-package com.tcs.authdemo.model;
+package com.nat.authdemo.model;
 
 
 import java.util.HashSet;
