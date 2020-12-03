@@ -1,12 +1,18 @@
 package com.nat.authdemotwo.controller;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +27,10 @@ import com.nat.authdemotwo.playload.request.SignupRequest;
 import com.nat.authdemotwo.playload.response.MessageResponse;
 import com.nat.authdemotwo.repository.RoleRepository;
 import com.nat.authdemotwo.repository.UserRepository;
+import com.nat.authdemotwo.security.jwt.JwtResponse;
+import com.nat.authdemotwo.security.jwt.JwtUtils;
+import com.nat.authdemotwo.security.services.UserDetailsImpl;
+
 
 @CrossOrigin("*")
 @Controller
@@ -33,13 +43,25 @@ public class AuthController {
 	
 	@Autowired
 	RoleRepository roleRepository;
+	@Autowired
+	AuthenticationManager authenticationmanager;
 	
-	@PostMapping("/login")
-	public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest){
-		return null;
+	@Autowired
+	JwtUtils jwtUtils;
+	
+	@PostMapping("/signin")
+	public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+		Authentication authentication = authenticationmanager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),loginRequest.getPassword()));
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		String jwt = jwtUtils.generateJwtToken(authentication);
+		UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
+		List<String> roles = userDetailsImpl.getAuthorities().stream().map(i->i.getAuthority()).collect(Collectors.toList());
+		
+		return ResponseEntity.ok(new JwtResponse(jwt,userDetailsImpl.getId(),userDetailsImpl.getEmail(),userDetailsImpl.getUsername(),roles));
+		
 	}
-	
 	@PostMapping("/signup")
+	
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest ) {
 		
 		if(userRepository.existsByUsername(signUpRequest.getUsername())) {
@@ -89,5 +111,5 @@ public class AuthController {
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}
-
 }
+

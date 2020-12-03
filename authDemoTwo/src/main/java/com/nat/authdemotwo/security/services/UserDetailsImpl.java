@@ -11,8 +11,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nat.authdemotwo.model.User;
 
+import lombok.Data;
 
 
+@Data
 public class UserDetailsImpl implements UserDetails {
 	private Long id;
 	private String username;
