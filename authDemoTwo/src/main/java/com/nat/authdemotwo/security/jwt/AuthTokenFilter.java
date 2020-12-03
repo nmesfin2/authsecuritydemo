@@ -8,6 +8,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.nat.authdemotwo.security.services.UserDetailsServiceImpl;
@@ -25,6 +29,26 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		
+		// collect the token
+		String jwt = parseJwt(request);
+		
+		// get username from token
+		String username = jwtUtils.getUserNameFromJwtToken(jwt);
+		UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
+		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		// authenticate the token
+		filterChain.doFilter(request, response);
+		
+	}
+	
+	private String parseJwt(HttpServletRequest request) {
+		String headerAuth = request.getHeader("Authorization");
+		
+		if(StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer")) {
+			return headerAuth.substring(7, headerAuth.length());
+		}
+		return null;
 	}
 
 }
