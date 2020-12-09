@@ -26,7 +26,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-
 	public User(String username2, String email2, String password2) {
 		// TODO Auto-generated constructor stub
 		this.email = email2;
